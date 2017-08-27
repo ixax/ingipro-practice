@@ -50,11 +50,11 @@ module.exports = function (server) {
                         });
                         break;
                     case 'chat:message':
-                        socket.broadcast.emit('main', {type: payload});
+                        socket.broadcast.emit('main', {type, payload});
                         break;
                     default:
                         if (store.addData(type, payload)) {
-                            socket.broadcast.emit('main', {type: payload});
+                            socket.broadcast.emit('main', {type, payload});
                         } else {
                             socket.emit('main', {type: 'access:denied'});
                         }

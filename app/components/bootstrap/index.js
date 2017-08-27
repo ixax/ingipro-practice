@@ -28,5 +28,5 @@ mediator.on('conference:sync', () => {
 });
 
 mediator.on('*', (data, type) => {
-    console.info(`Event type: ${type}, data: ${data}`);
+    //console.info(`Event type: ${type}, data: ${data}`);
 });

@@ -1,5 +1,5 @@
 import Marks from '../marks';
-// import Viewer from '../viewer';
+import Viewer from '../viewer';
 import './style.css';
 
 
@@ -203,7 +203,8 @@ class Layout {
             this._tapes[parentId][id].elem.style.flexBasis = "0%";
             this._tapes[parentId][id].lastFlexBasis = 0;
         }
-        // this._tapes[parentId][id].marks = new Marks(id, this._tapes[parentId][id].elem, "#000000");
+        //this._tapes[parentId][id].marks = new Marks(id, this._tapes[parentId][id].elem, "#000000");
+        this._tapes[parentId][id].viewer = new Viewer(this._tapes[parentId][id].elem);
     }
 
     _changeLayout () {

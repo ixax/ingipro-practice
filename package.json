@@ -6,12 +6,16 @@
   "dependencies": {
     "d3": "4.10.0",
     "express": "4.15.3",
-    "serve-static": "1.12.4",
     "randomcolor": "0.5.3",
+    "serve-static": "1.12.4",
     "socket.io": "2.0.3",
-    "uuid": "3.1.0"
+    "three": "0.87.1",
+    "three-obj-loader": "1.1.2",
+    "uuid": "3.1.0",
+    "three-trackballcontrols": "0.0.5"
   },
   "devDependencies": {
+    "@types/three": "0.84.20",
     "assets-webpack-plugin": "3.5.1",
     "autoprefixer": "7.1.2",
     "babel-core": "6.25.0",
