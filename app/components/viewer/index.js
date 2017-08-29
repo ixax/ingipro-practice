@@ -20,13 +20,42 @@ class Viewer {
         this._controls.addEventListener('change', this.renderPhone.bind(this));
         this.animationLoop();
         this._loader = new THREE.OBJLoader();
-
+        this._refreshCameraThrottle = this._throttle(this._refreshCamera, 40);
         mediator.on('viewer:addModel', this._uploadModel.bind(this));
-        mediator.on('viewer:change', this._refreshCamera.bind(this));
+        mediator.on('viewer:change', this._refreshCameraThrottle.bind(this));
+    }
+
+    _throttle(func, ms) {
+
+        let isThrottled = false;
+        let savedArgs;
+        let savedThis;
+
+        function wrapper() {
+
+            if (isThrottled) { // (2)
+                savedArgs = arguments;
+                savedThis = this;
+                return;
+            }
+
+            func.apply(this, arguments); // (1)
+
+            isThrottled = true;
+
+            setTimeout(() => {
+                isThrottled = false; // (3)
+                if (savedArgs) {
+                    wrapper.apply(savedThis, savedArgs);
+                    savedArgs = savedThis = null;
+                }
+            }, ms);
+        }
+
+        return wrapper;
     }
 
     _refreshCamera(newCamera) {
-        //console.dir(e);
         if (newCamera.userId !== this._userId) {
             this._camera.position.set(newCamera.cameraPos.x, newCamera.cameraPos.y, newCamera.cameraPos.z);
             this._camera.quaternion.set(newCamera.cameraQua._x, newCamera.cameraQua._y, newCamera.cameraQua._z);
@@ -122,7 +151,7 @@ class Viewer {
             cameraPos: this._camera.position,
             cameraQua: this._camera.quaternion,
             cameraRot: this._camera.rotation,
-            cameraUp: this._camera.up, userId: this._userId
+            cameraUp: this._camera.up, userId: this._userId,
         });
         this._renderer.render(this._scene, this._camera);
     }
