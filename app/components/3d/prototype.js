@@ -1,16 +1,15 @@
 'use strict';
 
-//import Mediator from '../mediator';
+import mediator from '../mediator';
 
 class Module3d {
 
-    constructor(id, width, height, x, y) {
+    constructor(id,elem) {
 
+        this.elem = elem;
         this.id = id;
-        this.width = width;
-        this.height = height;
-        this.x = x;
-        this.y = y;
+        this.width = elem.clientWidth;
+        this.height = elem.clientHeight;
 
         this.pause = false;
 
@@ -29,7 +28,7 @@ class Module3d {
         this.handler = this.handler.bind(this);
         this.throttle = this.throttle.bind(this);
         this.handleFileSelect = this.handleFileSelect.bind(this);
-        //this._sendMove = this._sendMove.bind(this);
+        this._sendMove = this._sendMove.bind(this);
 
         this.init(); // создать сцену, камеру, рендер, освещение и loader
         this.createElements(); // создать drop_zone и canvas
@@ -42,15 +41,15 @@ class Module3d {
 
         const div = document.createElement('div');
         div.id = `drop_zone${ this.id}`;
-        div.setAttribute('style',`position:absolute;left:${ this.x }px;top:${ this.y }px;width:${this.width }px;height:${ this.height }px;`);
-        document.body.insertBefore(div, document.body.firstChild);
+        div.setAttribute('style',`position:absolute;width:${this.width }px;height:${ this.height }px;`);
+        this.elem.appendChild(div);
 
         let container = document.createElement('div');
         container.innerHTML = '';
         container.id = `container${ this.id}`;
-        container.setAttribute('style',`position:absolute;left:${ this.x }px;top:${ this.y }px;`); // ?
+        container.setAttribute('style',`position:absolute;`); // ?
         container.appendChild(this.renderer.domElement); // <canvas width="1243" height="920" style="width: 995px; height: 736px;"></canvas> внутрь div id = container
-        document.body.insertBefore(container, document.body.firstChild);
+        this.elem.appendChild(container);
 
     }
 
@@ -64,11 +63,10 @@ class Module3d {
         document.addEventListener('keyup', this.handler);
         document.getElementById(`drop_zone${ this.id}`).onmouseout = this.handler;
         document.getElementById(`drop_zone${ this.id}`).onmouseover = this.handler;
-        // kinput.onkeydown = kinput.onkeyup =  this.throttle(this.handler.bind(this), 300);
 
-        window.addEventListener('resize', this.onWindowResize, false);
+        //window.addEventListener('resize', this.onWindowResize, false);
 
-        //mediator.on('model:getMove', this._getMove.bind(this));
+        mediator.on('model:getMove', this._getMove.bind(this));
     }
 
     init() {
@@ -78,7 +76,6 @@ class Module3d {
             .setPath('https://threejs.org/examples/textures/cube/pisa/')
             .load(['px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png']);
         this.scene.background = textureCube;
-        //this.scene.background = new THREE.Color( "black" );
 
         this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.1, 3000);
         this.camera.position.set(100,0,1000);
@@ -87,11 +84,7 @@ class Module3d {
         this.controls.rotateSpeed = 2.0;
         this.controls.zoomSpeed = 0.3;
         this.controls.panSpeed = 0.2; // right  mouse
-        this.controls.noZoom = true; // zoom   forbidden
-        this.controls.noPan = true; // pan    forbidden
-        this.controls.noRotate = true; // rotate forbidden
-        //this.controls.staticMoving = true;
-        //this.controls.dynamicDampingFactor = 0.3;
+        this.controls.enabled = false;
 
         this.scene.add(this.camera);
 
@@ -123,6 +116,7 @@ class Module3d {
 
         this.texture = new THREE.Texture();
         this.loaderImage = new THREE.ImageLoader(manager);
+
     }
 
     destructor() {
@@ -184,8 +178,11 @@ class Module3d {
                     child.material.map = this.texture;
                 }
             });
-            this.camera.lookAt(object);
             this.object = object;
+            this.object.position.x = 0;
+            this.object.position.y = 0;
+            this.object.position.z = 0;
+            this.camera.lookAt(object);
             this.scene.add(object);
 
         }, this.onProgress, this.onError);
@@ -206,8 +203,8 @@ class Module3d {
 
         if (this.object !== 'undefined') {
             this.deleteModel();
-            this.objectLoad = false;
-            this.textureLoad = false;
+           // this.objectLoad = false;
+           // this.textureLoad = false;
         }
 
         for (let i = 0, f; f = files[i]; i++) {
@@ -235,7 +232,7 @@ class Module3d {
 
                         }
 
-                    } else if (format === 'jpg') {          // если пользователь загрузил картинку
+                    } else if (format === 'jpg' || format === 'png') {          // если пользователь загрузил картинку
 
                         this.loadImage(e.target.result);    // загружаем её
                         this.textureLoad = true;            // сделать пометку об этом
@@ -269,17 +266,12 @@ class Module3d {
 
         if (event.keyCode == 17) { // ctrl
             if (event.type == 'keydown' && this.activeKeyboard == true) {
-                console.log('false');
-                this.controls.noZoom = false; // zoom allowed (зум) 5
-                this.controls.noPan = false; // pan allowed (панорамирование) 6
-                this.controls.noRotate = false; // rotate allowed (поворот камеры) 7
+
+                this.controls.enabled = true;
 
             } else if (event.type == 'keyup' || this.activeKeyboard == false) {
 
-                console.log('true');
-                this.controls.noZoom = true;
-                this.controls.noPan = true;
-                this.controls.noRotate = true;
+                this.controls.enabled = false;
 
             }
         }
@@ -294,6 +286,7 @@ class Module3d {
         this.controls.update();
         this.render();
 
+        this._sendMove();
     }
 
     render() {
@@ -352,24 +345,50 @@ class Module3d {
 
     }
 
-    /*_sendMove() {
+    _sendMove() {
 
         const payload = {};
-        payload.scene = this.scene;
-        payload.camera = this.camera;
+        payload.cameraX = this.camera.position.x;
+        payload.cameraY = this.camera.position.y;
+        payload.cameraZ = this.camera.position.z;
+
+        payload.rotationX = this.camera.rotation.x;
+        payload.rotationY = this.camera.rotation.y;
+        payload.rotationZ = this.camera.rotation.z;
+
+        payload.quaternionX = this.camera.quaternion.x;
+        payload.quaternionY = this.camera.quaternion.y;
+        payload.quaternionZ = this.camera.quaternion.z;
+
+        payload.upX = this.camera.up.x;
+        payload.upY = this.camera.up.Y;
+        payload.upZ = this.camera.up.Z;
+
         mediator.emit('model:getMove', payload);
 
     }
 
     _getMove(payload) {
 
-        this.scene = payload.scene;
-        this.camera = payload.camera;
+        this.camera.position.x = payload.cameraX;
+        this.camera.position.y = payload.cameraY;
+        this.camera.position.z = payload.cameraZ;
 
-    }*/
+        this.camera.rotation.x = payload.rotationX;
+        this.camera.rotation.y = payload.rotationY;
+        this.camera.rotation.z = payload.rotationZ;
+
+        this.camera.quaternion.x = payload.quaternionX;
+        this.camera.quaternion.y = payload.quaternionY;
+        this.camera.quaternion.z = payload.quaternionZ;
+
+        this.camera.up.x = payload.upX;
+        this.camera.up.Y = payload.upY;
+        this.camera.up.Z = payload.upZ;
+    }
 }
 
-//export default Module3d;
+export default Module3d;
 
 // 1) как по-другому остановить requestAnimationFrame
 // 2) при не ппадании в drop_zone открывается файл. пофиксить

@@ -1,4 +1,5 @@
 import Marks from '../marks';
+import Module3d from '../3d/prototype.js';
 import mediator from '../mediator';
 // import Viewer from '../viewer';
 import './style.css';
@@ -13,7 +14,7 @@ class Layout {
         this._domNode = domNode;
 
         document.addEventListener("click", this._changeLayout.bind(this), false);
-        mediator.on('layout:change', this._handleLayout.bind(this));
+        // mediator.on('layout:change', this._handleLayout.bind(this));
         mediator.on('conference:sync', this._getUser.bind(this));
     }
 
@@ -213,8 +214,11 @@ class Layout {
             this._tapes[parentId][id].lastFlexBasis = 0;
         }
 
-        this._marks = new Marks(this._user, this._tapes[parentId][id]);
-        this._tapes[parentId][id].svg = this._marks.svg;
+        // this._marks = new Marks(this._user, this._tapes[parentId][id]);
+        // this._tapes[parentId][id].svg = this._marks.svg;
+
+        this.model = new Module3d(this._user.userId, this._tapes[parentId][id].elem);
+
     }
 
     _changeLayout () {
@@ -877,7 +881,9 @@ class Layout {
         this._addForLines = 2 * 10/this._tapes[0].elem.clientWidth * 100;
 
         this._tapes[1].elem.style.width = 100 + this._addForLines + "%";
-        this._tapes[3].elem.style.width = 100 + this._addForLines + "%";
+        this._tapes[3].elem.style.width = 100 + this._addForLines + "%"
+
+        this.model.onWindowResize();
     }
 
     _throttle(func, ms) {
