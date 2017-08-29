@@ -52,9 +52,10 @@ exports.unlock = function (userId) {
 };
 
 exports.addData = function (type, payload) {
-    if (lock && userLock === payload.userId){
+    //@fixme remove `comments`
+    //if (lock && userLock === payload.userId){
         store[type] = payload;
         return true;
-    }
+    //}
     return false;
 };

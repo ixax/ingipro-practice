@@ -1,5 +1,6 @@
 import Marks from '../marks';
 import Viewer from '../viewer';
+import mediator from '../mediator';
 import './style.css';
 
 
@@ -12,6 +13,13 @@ class Layout {
         this._domNode = domNode;
 
         document.addEventListener("click", this._changeLayout.bind(this), false);
+
+        // Save data for marks and viewer
+        mediator.on('conference:sync', (e) => {
+            console.dir(e);
+            this.userId = e.userList[e.userList.length - 1].userId;
+            console.log(this.userId);
+        });
     }
 
     hide() {
@@ -204,7 +212,8 @@ class Layout {
             this._tapes[parentId][id].lastFlexBasis = 0;
         }
         //this._tapes[parentId][id].marks = new Marks(id, this._tapes[parentId][id].elem, "#000000");
-        this._tapes[parentId][id].viewer = new Viewer(this._tapes[parentId][id].elem);
+
+        this._tapes[parentId][id].viewer = new Viewer(this._tapes[parentId][id].elem, this.userId);
     }
 
     _changeLayout () {
