@@ -37,7 +37,7 @@ class Users {
 	    const userName = document.createElement('div');
 	    userName.className = 'userName';
 	    userName.innerHTML = item.name;
-	    newUser.appendChild(userName);    
+	    newUser.appendChild(userName);
 	}
 
     _addUser(payload) {

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>3d engine</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            color: red;
+            font-family: Monospace;
+            font-size:13px;
+            bold: true;
+            background-color: gold;
+            margin: 0px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<!--<div id="bye" style="position:absolute;left:1200px;top:280px;width:200px;height:200px;"><strong>This element will deleted</strong></div>-->
+
+<script src="https://threejs.org/build/three.js"></script>  <!--main library-->
+<script src="https://threejs.org/examples/js/controls/TrackballControls.js"></script> <!--zoom-->
+<script src="https://threejs.org/examples/js/loaders/OBJLoader.js"></script> <!--load obj-->
+
+<script src="prototype.js"></script>
+
+<script>
+    let a = new Module3d(0,window.innerWidth,window.innerHeight,0,0);
+//    let example = new Module3d(0,400,400,0,0);
+//
+//    let example1 = new Module3d(1,400,400,800,300);
+
+    /*let example2 = new Module3d(1,200,200,1200,300);
+
+    setTimeout( ()=> {
+        example2.destructor();
+        let div = document.getElementById("bye");
+        document.getElementsByTagName('body')[0].removeChild(div);
+        },10000);*/
+
+</script>
+
+</body>
+</html>

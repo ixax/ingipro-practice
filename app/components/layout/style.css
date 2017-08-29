@@ -3,10 +3,7 @@
 }
 
 .layout {
-    top: 5%;
-    left: 5%;
-    width: 75%;
-    height: 90%;
+    flex-grow: 1;
     align-self: stretch;
     position: relative;
     display: flex;
@@ -24,25 +21,19 @@
 }
 
 .line {
-    position: absolute;
-    background: #87ceeb;
     cursor: pointer;
 }
 
-.internalLine {
+.tapeLine {
     background: #87ceeb;
-    cursor: pointer;
 }
 
 .cellLine {
-    position: absolute;
     background: black;
-    cursor: pointer;
 }
 
-.internalCellLine {
-    background: black;
-    cursor: pointer;
+.external {
+    position: absolute;
 }
 
 .top {
