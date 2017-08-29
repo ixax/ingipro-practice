@@ -218,7 +218,8 @@ class Layout {
         // this._tapes[parentId][id].svg = this._marks.svg;
 
         this.model = new Module3d(this._user.userId, this._tapes[parentId][id].elem);
-
+        this._tapes[parentId][id].model = this.model;
+        console.log("create new");
     }
 
     _changeLayout () {

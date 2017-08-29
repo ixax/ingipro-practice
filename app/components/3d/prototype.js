@@ -40,14 +40,14 @@ class Module3d {
     createElements() {
 
         const div = document.createElement('div');
-        div.id = `drop_zone${ this.id}`;
-        div.setAttribute('style',`position:absolute;width:${this.width }px;height:${ this.height }px;`);
+        div.id = `drop_zone${this.id}`;
+        div.setAttribute('style',`position:absolute;width:100%;height:100%;z-index:1000`);
         this.elem.appendChild(div);
 
         let container = document.createElement('div');
         container.innerHTML = '';
-        container.id = `container${ this.id}`;
-        container.setAttribute('style',`position:absolute;`); // ?
+        container.id = `container${this.id}`;
+        container.setAttribute('style',`position:absolute;`);
         container.appendChild(this.renderer.domElement); // <canvas width="1243" height="920" style="width: 995px; height: 736px;"></canvas> внутрь div id = container
         this.elem.appendChild(container);
 
@@ -167,7 +167,6 @@ class Module3d {
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.width, this.height);
         this.controls.handleResize();
-
     }
 
     loadObject(target) {
@@ -286,7 +285,7 @@ class Module3d {
         this.controls.update();
         this.render();
 
-        this._sendMove();
+        //this._sendMove();
     }
 
     render() {
