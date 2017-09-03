@@ -13,41 +13,32 @@ class Marks {
         this._flag = false;
         this._countLines = 0;
         this._color = this._user.color;
-
+        this._parent = parent.elem;
         this._domMark = d3.select(parent.elem);
-
+        //parent.elem.onmouseout = () => console.log('out');
+        this.myHeight = this._parent.clientHeight;
+        this.myWidth = this._parent.clientWidth;
         this.svg = this._domMark.append('svg')
             .on('mousedown', this.mousedown.bind(this))
             .style('width', '100%')
             .style('height', '100%')
             .style('background-color', 'transparent');
-        this._data = [];
-
+        this.lines = [];
         this.line = d3.line()
             .x(d => d[0])
             .y(d => d[1])
             .curve(d3.curveLinear);
-        // this.metodChangeSVG = this.changeSVG.bind(this);
-        // this.metodDrowNewLine = this.drowNewLine.bind(this);
-        // this.metodDeleteAll = this.deleteAll.bind(this);
-        mediator.on('svg:change', this._handleSVG.bind(this));
-        // mediator.on('layout:change', this.deletePath.bind(this));
-        // mediator.on('3d:turn', this.metodDeleteAll);
-        // mediator.on('3d:zoom', this.metodDeleteAll);
-        // mediator.on('3d:pan', this.metodDeleteAll);
-        // mediator.on('marks:add', this.metodDrowNewLine);
+
+        mediator.on('mark:sync', this._drawSVG.bind(this));
+        mediator.on('mark:change', this._handleSVG.bind(this));
+        mediator.on('camera:change', this._deletePath.bind(this));
+        mediator.on('layout:change', this._deleteNeedPath.bind(this));
     }
 
-    // destruct(){
-    //     mediator.off('layout:change', this.metodChangeSVG);
-    //     mediator.off('3d:turn', this.metodDeleteAll);
-    //     mediator.off('3d:zoom', this.metodDeleteAll);
-    //     mediator.off('3d:pan', this.metodDeleteAll);
-    //     mediator.off('marks:add', this.metodDrowNewLine);
-    // }
-
     _onDownShiftPlusCtrl(e) {
-        if (e.shiftKey === true && e.ctrlKey === true) {this._flag = true;}
+        if (e.shiftKey === true && e.ctrlKey === true) {
+            this._flag = true;
+        }
     }
 
     _onUpShiftPlusCtrl(e) {
@@ -56,27 +47,24 @@ class Marks {
         }
     }
 
-    // changeSVG(obj){
-    //     if (!this._flag) {
-    //         return -1;
-    //     }
-    //
-    //     if (this.id === obj.id) {
-    //         this.changeProportions(obj.newWidth, obj.newHeight);
-    //     }
-    // }
-    //
-    // changeProportions(width, height) {
-    //     this.svg
-    //     .style("width", width)
-    //     .style("height", height);
-    // }
-    // deletePath(obj) {
-    //
-    //     if (this.id === obj.id) {
-    //         this.svg.selectAll('path').remove();
-    //     }
-    // }
+    _drawSVG(obj){
+        const payload = obj[this._globalId];
+        console.log(this._globalId, payload, 'check');
+        this._restoreSVG(payload);
+    }
+    _deleteNeedPath(obj) {
+        if (this.myHeight !== this._parent.clientHeight || this.myWidth !== this._parent.clientWidth) {
+            this.svg.selectAll('path').remove();
+            this.myHeight = this._parent.clientHeight;
+            this.myWidth = this._parent.clientWidth;
+        }
+    }
+
+    _deletePath(obj) {
+        if (this._globalId === obj.globalId) {
+            this.svg.selectAll('path').remove();
+        }
+    }
 
     mousedown() {
         if (!this._flag) {
@@ -105,36 +93,31 @@ class Marks {
                 this.path.attr('d', this.line(data));
             })
             .on('mouseup', () => {
-
-            // mediator.emit('marks:add', {
-            //     id: this.id,
-            //     data: data,
-            //     otherColor: this._color
-            // });
-
                 this.svg.on('mousemove', null);
-                // if (data.length) {
-                //     this._data[this._countLines++] = data.slice();
-                // }
-                this._data = data.slice(); // but conf:sync wont be so easy
+
+                this.lines[this.lines.length] = {
+                    data: data,
+                    color: this._color,
+                };
 
                 setTimeout(this._serializeSVG.bind(this), 20);
                 data = [];
+                return data;
             });
     }
 
     _serializeSVG() {
-        let copy = this._data;
         const payload = {
             userId: this._user.userId,
             globalId: this._globalId,
-            userColor: this._color,
-            svg: copy,
+            lines: this.lines,
         };
-        mediator.emit('svg:change', payload);
+        //console.log(payload);
+        mediator.emit('mark:change', payload);
     }
 
     _handleSVG(payload) {
+        //console.log(payload);
         if (payload.userId !== this._user.userId && payload.globalId === this._globalId) {
             this._restoreSVG.bind(this)(payload);
         }
@@ -148,29 +131,22 @@ class Marks {
     }
 
     _restoreSVG(payload) {
-        if (this._isEmpty(this.path)) {
-            this.path = this.svg.append('path');
-            this.path
-                .attr('stroke', payload.userColor)
-                .attr('stroke-width', 4)
-                .attr('fill', 'none')
-                .attr('position', 'relative');
-        }
-
+        this.path = this.svg.append('path');
         this.path
-            .attr('stroke', payload.userColor)
-            .attr('d', this.line(payload.svg));
-    }
+            .attr('stroke-width', 4)
+            .attr('fill', 'none')
+            .attr('position', 'relative');
 
-    // drowNewLine(obj) {
-    //     //add handler to yourself
-    //
-    //     if (this.id === obj.id) {
-    //         this.path
-    //         .attr("stroke", obj.otherColor)
-    //         .attr("d", this.line(obj.data));
-    //     }
-    // }
+        this.lines = payload.lines;
+        console.log(this.lines);
+        //this.svg.select('path').selectAll('d').remove();
+
+        this.lines.forEach(val => {
+            this.path
+                .attr('stroke', 'black')
+                .attr('d', this.line(val.data));
+        });
+    }
 }
 
 export default Marks;

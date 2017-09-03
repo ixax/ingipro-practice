@@ -983,6 +983,10 @@ class Layout {
             texture: payload.texture,
         };
 
+        this._mark = {
+            mark: payload.mark,
+        };
+
         this._layout = payload['layout'];
     }
 
@@ -992,6 +996,9 @@ class Layout {
         }
         if (!this._isEmpty(this._viewer)) {
             mediator.emit('viewer:sync', this._viewer);
+        }
+        if (!this._isEmpty(this._mark)) {
+            mediator.emit('mark:sync', this._mark.mark);
         }
     }
 
