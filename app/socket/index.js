@@ -2,6 +2,7 @@ const store = require('../store');
 
 module.exports = function (server) {
     const io = require('socket.io').listen(server, {
+        path: '/ws',        
         reconnection: true,
         reconnectionDelay: 1000,
         reconnectionAttempts: 5,

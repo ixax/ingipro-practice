@@ -5,7 +5,10 @@ import Mediator from '../mediator';
 
 class WebSocket {
     constructor() {
-        this._socket = io.connect();
+        this._socket = io.connect({
+            path: '/ws',
+            transports: ['websocket'],
+        });
 
         this._socket.on( 'main', this.socketEmitMediator.bind(this) );                           //Recv from Server
 

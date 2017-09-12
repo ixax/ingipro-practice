@@ -4,7 +4,7 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlPlugin = require('html-webpack-plugin');
 const TextPlugin = require('extract-text-webpack-plugin');
-const {NODE_ENV} = process.env;
+const {NODE_ENV = 'development'} = process.env;
 
 function getConfig(env) {
     const isDevelopment = env === 'development';
@@ -116,6 +116,5 @@ function getConfig(env) {
     };
 }
 
-module.exports = (NODE_ENV === 'production')
-    ? [getConfig('production'), getConfig('testing')]
-    : getConfig('development');
+module.exports = getConfig(NODE_ENV);
+

@@ -131,6 +131,10 @@ class Marks {
     }
 
     _restoreSVG(payload) {
+        if (!payload) {
+            return;
+        }
+
         this.path = this.svg.append('path');
         this.path
             .attr('stroke-width', 4)
